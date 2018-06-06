@@ -7,6 +7,7 @@ import math
 from odoo import api, fields, models, _
 from odoo.tools import amount_to_text_en, float_round
 from odoo.exceptions import UserError, ValidationError
+from odoo.tools.float_utils import float_compare
 
 INV_TO_PARTN = {
     'out_invoice': 'customer',
@@ -196,7 +197,7 @@ class AccountRegisterPayments(models.TransientModel):
         data = {}
         if self.is_customer:
             context.update({'is_customer': True})
-            if self.total_customer_pay_amount != self.cheque_amount:
+            if float_compare(self.total_customer_pay_amount, self.cheque_amount, 2) != 0:
                 raise ValidationError(_('Verification Failed! Total Invoices'
                                         ' Amount and Check amount does not'
                                         ' match!.'))
@@ -271,7 +272,7 @@ class AccountRegisterPayments(models.TransientModel):
                         })
         else:
             context.update({'is_customer': False})
-            if self.total_pay_amount != self.cheque_amount:
+            if float_compare(self.total_pay_amount, self.cheque_amount, 2) != 0:
                 raise ValidationError(_('Verification Failed! Total Invoices'
                                         ' Amount and Check amount does not'
                                         ' match!.'))
